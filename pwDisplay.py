@@ -25,16 +25,16 @@ def open_file():
         myaccountBook.setSessionFile(filepath)
         #myaccountBook.addEntry()
 
-    updateTextField(txt_display, displayAccountBook())
+    updateTextField(txt_display, displayAccountBook(""))
     updateTextField(txt_edit, myaccountBook.toString())
    
-    window.title(f"Simple Text Editor - {filepath}")
+    window.title(f"Bean Password Manager - {filepath}")
 #####################################################################
 def save_file():
     """Save the current file as a new file."""
     if verifySettings():
         filepath = asksaveasfilename(
-            defaultextension=".txt",
+            defaultextension="bbt_pwManDataTemp.bean",
             filetypes=[("Bean Files", "*.bean"),("Text Files", "*.txt"), ("All Files", "*.*")],
         )
         if not filepath:
@@ -42,7 +42,7 @@ def save_file():
         with open(filepath, mode="w", encoding="utf-8") as output_file:
             text = txt_edit.get("1.0", tk.END)
             output_file.write(text)
-        window.title(f"Simple Text Editor - {filepath}")
+        window.title(f"Bean Password Manager - {filepath}")
 #####################################################################
 #####################################################################
 def add_entry():
@@ -61,16 +61,13 @@ def add_entry():
     #txt_display.update()
     updateTextField(txt_display, output)
     
-    password = askstring(title, "Please enter password: ")
+    password = askstring(title, "Please enter password: ", show="*")
     output += "\nPassword: "+password
-    txt_display.configure(text=output)
-    txt_display.update()
     updateTextField(txt_display, output)
     
-    output += "\nAdd Entry: "+myaccountBook.addEntry(account,username,password)
-    txt_display.configure(text=output)
-    txt_display.update()
-    updateTextField(txt_display, output)
+    myaccountBook.setAccountKey(myaccountBook.getSessionKey())
+    output += "\nAdd Entry: "+myaccountBook.addEntry(account,username,password)+"\n\n"
+    updateTextField(txt_display, output+displayAccountBook(""))
     
     #txt_edit.delete("1.0","end")
     #txt_edit.insert(tk.END, myaccountBook.toString())
@@ -84,17 +81,31 @@ def remove_entry():
     #account = askstring(title, "Please enter the account you wish to remove: ")
     output = "Site Account created with: "+str(selection)
     myaccountBook.removeEntry(selection)
-    updateTextField(txt_display, displayAccountBook())
+    updateTextField(txt_display, displayAccountBook(""))
     updateTextField(txt_edit, myaccountBook.toString())
     
 def show_PWs():
-    myaccountBook.editEntry()
+    updateTextField(txt_display, displayAccountBook("show"))
+    updateTextField(txt_edit, myaccountBook.toString())
 def hide_PWs():
-    myaccountBook.editEntry()
+    updateTextField(txt_display, displayAccountBook(""))
+    updateTextField(txt_edit, myaccountBook.toString())
 def show_options():
-    myaccountBook.editEntry()
+    #myaccountBook.editEntry()
+    def dismiss ():
+        dlg.grab_release()
+        dlg.destroy()
+
+    dlg = tk.Toplevel(window)
+    tk.Button(dlg, text="Done", command=dismiss).grid()
+    dlg.protocol("WM_DELETE_WINDOW", dismiss) # intercept close button
+    dlg.transient(window)   # dialog window is related to main
+    dlg.wait_visibility() # can't grab until window appears, so we wait
+    #dlg.grab_set()        # ensure all input goes to our window
+    dlg.wait_window()     # block until window is destroyed
 #####################################################################
-def displayAccountBook():
+def displayAccountBook(vision):
+    print("---pwDisplay: displayAccountBook(): start")
     output = "Account Email: "+ str(myaccountBook.getAccountEmail()) +"\n"
     output += "Account Key: "+ myaccountBook.getAccountKey() +"\n"
     output += "Session Key: "+ myaccountBook.getSessionKey() +"\n"
@@ -108,7 +119,11 @@ def displayAccountBook():
         output += "     Entry AccountHolder: "+ account.getAccountHolder() +"\n"
         output += "     Entry Username: "+ account.getUsername() +"\n"
         output += "     Entry Email: "+ account.getEmail() +"\n"
-        output += "     Entry Password: "+ account.getPassword() +"\n"
+        print("---pwDisplay: displayAccountBook(): vision == show? " , (vision == "show") )
+        if vision == "show":
+            output += "     Entry Password: "+ account.getDecPassword(myaccountBook.getAccountKey()).decode("utf-8") +"\n"
+        else:
+            output += "     Entry Password: "+ account.getPassword() +"\n"
         entryCount += 1
     return output
 #####################################################################
@@ -117,12 +132,12 @@ def verifySettings():
     if len(myaccountBook.getAccountEmail()) <= 7:
         account = askstring(title, "Please enter an email for your account: ")
         myaccountBook.setAccountEmail(account)
-        txt_display.configure(text=displayAccountBook())
-        txt_display.update()
+        updateTextField(txt_display, displayAccountBook(""))
+        updateTextField(txt_edit, myaccountBook.toString())
     if len(myaccountBook.getAccountKey()) <= 7:
         myaccountBook.setAccountKey(myaccountBook.getSessionKey())
-        txt_display.configure(text=displayAccountBook())
-        txt_display.update()
+        updateTextField(txt_display, displayAccountBook(""))
+        updateTextField(txt_edit, myaccountBook.toString())
 
     return True
 #####################################################################
@@ -152,7 +167,7 @@ def createButtons(frm_buttons):
     btn_remove.grid(row=3, column=0, sticky="ew", padx=5)
     btn_show.grid(row=4, column=0, sticky="ew", padx=5)
     btn_hide.grid(row=5, column=0, sticky="ew", padx=5)
-    btn_options.grid(row=5, column=0, sticky="ew", padx=5)
+    btn_options.grid(row=6, column=0, sticky="ew", padx=5)
 #####################################################################
 
 #####################################################################
@@ -184,7 +199,7 @@ txt_display.grid(row=0, column=0, sticky="nwe")
 txt_edit.grid(row=1, column=0, sticky="nwe")
 
 #txt_display.configure(text="Display")
-txt_display.insert(tk.END, displayAccountBook())
+txt_display.insert(tk.END, displayAccountBook(""))
 txt_display.configure(state ='disabled')
 #txt_display.configure(state ='enabled')
 #txt_display.configure(wraplength=1000)

@@ -1,6 +1,6 @@
 #Purpose: Simple class definition to store passwords in an encrypted format
 import json
-
+from cryptography.fernet import Fernet
 
 class myAccountEntry:
     def __init__(self):
@@ -22,6 +22,13 @@ class myAccountEntry:
         return self.username
     def getPassword(self):
         return self.password
+    def getDecPassword(self, accountKey):
+        fernet = Fernet(accountKey)
+        # then use the Fernet class instance
+        # to encrypt the string string must
+        # be encoded to byte string before encryption
+        decPW = fernet.decrypt(self.password)
+        return decPW
 #Setters
     def setAccountHolder(self, input):
         self.accountHolder = input
@@ -29,8 +36,17 @@ class myAccountEntry:
         self.email = input
     def setUsername(self, input):
         self.username = input
-    def setPassword(self, input):
-        self.password = input
+    def setPassword(self, accountKey, input):
+        print("account key: ", accountKey)
+        if len(accountKey) < 10:
+            print("Need account key")
+            return
+        fernet = Fernet(accountKey.encode())
+        # then use the Fernet class instance
+        # to encrypt the string string must
+        # be encoded to byte string before encryption
+        encPW = fernet.encrypt(input.encode())
+        self.password = encPW.decode('utf-8')
 #Utility
     def toString(self):
         #dataString = self.accountHolder+"::"+self.username+"::"+self.email+"::"+self.password
