@@ -12,8 +12,8 @@ class myAccountBook:
     def __init__(myactbook):
         #myactbook.name = name
         #myactbook.age = age
-        myactbook.accountKey = ""
         myactbook.accountEmail = ""
+        myactbook.accountKey = ""
         myactbook.sessionKey = ""
         myactbook.sessionFile = ""#savKey2023-09-24_19.21.58.475349.bean.txts
         myactbook.accountsList = []#list of dictionaries instead of accountEntry's to stay serializeable.
@@ -22,13 +22,10 @@ class myAccountBook:
                         #bbean_pwManData.bean
         # Instance the Fernet class with the key
         myactbook.sessionKey = Fernet.generate_key().decode('utf-8')
-        #myactbook.fernet = Fernet(myactbook.sessionKey)
         #newEntry = accountEntry()
         #list
         #myactbook.accountsList.append(json.dumps(newEntry.__dict__))
-        # then use the Fernet class instance
-        # to encrypt the string string must
-        # be encoded to byte string before encryption
+
 #Getters
     def getAccountKey(myactbook):
         return myactbook.accountKey
@@ -80,7 +77,7 @@ class myAccountBook:
         newEntry.setUsername(username)
         if (myactbook.accountEmail):
             newEntry.setEmail(myactbook.accountEmail)
-        newEntry.setPassword(password)
+        newEntry.setPassword(myactbook.accountKey, password)
         #myactbook.accountsList[newEntry.getAccountHolder()] = newEntry
         myactbook.accountsList.append(json.dumps(newEntry.__dict__))
         return newEntry.toString()
