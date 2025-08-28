@@ -15,60 +15,12 @@ class drawHTML:
     
 ##############################-Class Objects-##########################################
     myDownloadSession = DownloadSession()
-    videoData = {
-                "1": {
-                    "cid": "UgxvmVYzQ_0gYQGBhcZ4AaABAg",
-                    "text": "The white have done nothing but steal and Kill whoever did not believe in their will it is a fact in history. Take Puerto Rico as a perfect example the difference is we are not being killed outright now days.  But we are being starved and striped of our riches by the wait it has been happening forever. Eventhoe we fight and die and have died for this country in every war.",
-                    "time": "46 seconds ago",
-                    "author": "@pereztattoo",
-                    "channel": "UCv5s3fPwp_hwJ4tBkFl5g-g",
-                    "votes": "0",
-                    "replies": "",
-                    "photo": "https://yt3.ggpht.com/ytc/AIdro_k_J4FHEowgLxQwzHA-o1ZKRBeAY3dLK7SBuFQhgOk=s88-c-k-c0x00ffffff-no-rj",
-                    "heart": "false",
-                    "reply": "false",
-                    "time_parsed": "2025-05-21 08:12:57"
-                },
-                "2": {
-                    "cid": "Ugwe6LjCcIWEMPjaz5N4AaABAg",
-                    "text": "White boy said white people smarter look like to me black guy took his ass to history class\ud83e\udd23\ud83e\udd23\ud83e\udd23",
-                    "time": "1 minute ago",
-                    "author": "@ImHim5252",
-                    "channel": "UCSmVZWYkm5kxrxqWhqFEpUg",
-                    "votes": "0",
-                    "replies": "",
-                    "photo": "https://yt3.ggpht.com/uup4avLjkeKoPr9XnIpYoT1Y2AAm4L1QYzpN9u2Ob6kFVW4KMqGUP3Id4Hd15RYcupTvz9pTuas=s88-c-k-c0x00ffffff-no-rj",
-                    "heart": "false",
-                    "reply": "false",
-                    "time_parsed": "2025-05-21 08:12:43"
-                },
-                "3": {
-                    "cid": "UgwQEFmzqenOrPvdfKZ4AaABAg",
-                    "text": "1:08:23 I can\u2019t watch this anymore. This white guy doesn\u2019t know shit",
-                    "time": "1 minute ago",
-                    "author": "@marcusjohnson9243",
-                    "channel": "UC5mtcn1JD5IYH9FH6XW__tg",
-                    "votes": "0",
-                    "replies": "",
-                    "photo": "https://yt3.ggpht.com/ytc/AIdro_kHm0gcr_suppS7eDR0dIZIObkz4lymEZWKSZYdAr8doQ=s88-c-k-c0x00ffffff-no-rj",
-                    "heart": "false",
-                    "reply": "false",
-                    "time_parsed": "2025-05-21 08:12:43"
-                }
-    }
-    videoData2 = {
-                "1": {
-                    "cid": "UgxvmVYzQ_0gYQGBhcZ4AaABAg",
-                    "text": "The white have done nothing but steal a.",
-                    "time": "46 seconds ago",
-                    "author": "@pereztattoo"
-                }
-    }
+    videoData = {}
     
 ##############################-Helper Functions-##########################################
     # @staticmethod
-    def remove_surrogates(self, text):
-        encoded_bytes = text.encode('utf-16', errors='replace')
+    def remove_surrogates(self, mytext):
+        encoded_bytes = mytext.encode('utf-16', errors='replace')
                              # text.encode('utf-16', 'surrogateescape', errors='replace')
         # print(f"remove_surrogates: {encoded_bytes}\n")
         encoded_bytes = encoded_bytes.decode('utf-8', 'replace')
@@ -138,54 +90,118 @@ class drawHTML:
             """
         pass
 
+    def drawTopNavBar(self):
+
+        topNavBarDivStyle = """ 
+        background-color:#2A4747; 
+        position: absolute;
+        height: 88px;
+        width: 100%;
+        padding: 10;
+        border-radius: 4px;
+        """
+        topNavBarStyle="""
+        height: 75px;
+        width: 90%;
+        display: flex;
+        flex-direction: row;
+        flex-wrap: nowrap;
+        justify-content: flex-end;
+        """
+
+        extratoppings = """
+        top: 0;
+        left: 0;
+        right: 0;
+        max-width: 1750px;
+        margin-left: auto;
+        margin-right: auto; 
+        z-index: 4;
+        font-size: 16px;
+        """
+
+        topNavBarItemStyle = """
+        float: left;
+        #width: 300px;
+        border: 5px green;
+        border-style: outset;
+        border-width: 10px;
+        background-color:#61D095;
+        margin: auto;
+        flex-grow:1;
+        """
+
+        with div(id="topNavBarDiv", style=topNavBarDivStyle) as TopNavBarDiv:  #style=
+            with nav(id="topNavBar", style=topNavBarStyle):
+                with a('Home', href='http://18.225.8.106/', style=topNavBarItemStyle):
+                    pass
+                with a('Profile', href='http://18.225.8.106:5000/proxy/youtube', style=topNavBarItemStyle):
+                    pass
+                with a('Goto PageTop', href='#page-TOP', style=topNavBarItemStyle):
+                    pass
+                with a('Goto Page Bottom', href='#page-BOT', style=topNavBarItemStyle):
+                    pass
+
+            pass
+
+        return TopNavBarDiv
+
     def drawDataEntryColumn(self, username, formDict=None):
         url_input_value = ""
         if formDict is not None:
             print("drawDataEntryColumn: pull form values") #Add user input data to page b4 transmit
             url_input_value = formDict["url_input"]
+            commentCount_range_value = formDict["commentCount_range"]
+            commentCount_input_value = formDict["commentCount_input"]
             un_search_value = formDict["un_search_input"]
             comment_search_value = formDict["comment_search_input"]
             cid_search_value = formDict["cid_search_input"]
+            set_displayAll_button_visible = True
             print(f"drawDataEntryColumn: url_input_value: {url_input_value}")
         else:
             print("drawDataEntryColumn: print basic form")
             print(f"drawDataEntryColumn: username: {username}")
             url_input_value = ""
+            commentCount_range_value = 100
+            commentCount_input_value = 100
             un_search_value = ""
             comment_search_value = ""
             cid_search_value = ""
-            pass
+            set_displayAll_button_visible = False
 
-        with div(cls="column", id="dataEntryColumn", style="background-color:#C0D6DF;") as dataEntryDiv:
+        with div(id="dataEntryColumn", style="background-color:#C0D6DF;") as dataEntryDiv:#cls="column",
             # Link entry fields
             with form(action=f"http://18.225.8.106:5000/{username}/youtube/view_comments", method="get",
                       name="url_input_form"):
                 p('Enter a YouTube link in the box to download comments:')
                 input_(type='text', name='url_input', cls="text_input_url", value=url_input_value, required=True)
                 p('Number of comments to download:')
-                input_(type='range', name='commentCount_range', min="100", max="5000", value="100", step="100",
+                input_(type='range', name='commentCount_range', min="100",max="5000", value=commentCount_range_value, step="100",
                        oninput="this.form.commentCount_input.value=this.value")
-                input_(type='number', name='commentCount_input', min="100", max="5000", value="100",
+                input_(type='number', name='commentCount_input', min="100", max="5000", value=commentCount_input_value,
                        oninput="this.form.commentCount_range.value=this.value")
-                input_(type='submit', value="Send", name="url_input_form")
+                input_(type='submit', value="Download", name="url_input_form", title="Click to download comments.")
+                input_(type='submit', value="Display All",
+                       formaction=f"http://18.225.8.106:5000/{username}/youtube/search_comments_author", method="get",
+                       name="display_all_form", title="Click to re-display downloaded comments.", visible=set_displayAll_button_visible)
                 hr()
             # Search author field
             # with form(action=f"http://18.225.8.106:5000/{username}/youtube/search_comments_author", method="get",name="search_author_form"):
                 p('Search YouTube comment author:')
                 input_(type='text', name='un_search_input', value=un_search_value, cls="text_input")
-                input_(type='submit', value="Send", formaction=f"http://18.225.8.106:5000/{username}/youtube/search_comments_author", method="get", name="search_author_form")
+                input_(type='submit', value="Search", formaction=f"http://18.225.8.106:5000/{username}/youtube/search_comments_author", method="get", name="search_author_form")
                 hr()
             # Search comment field
             # with form(action=f"http://18.225.8.106:5000/{username}/youtube/search_comments_text", method="get", name="search_comment_form"):
                 p('Search YouTube comment text:')
                 input_(type='text', name='comment_search_input', value=comment_search_value, cls="text_input")
-                input_(type='submit', value="Send", formaction=f"http://18.225.8.106:5000/{username}/youtube/search_comments_text", method="get", name="search_comment_form")
+                input_(type='submit', value="Search", formaction=f"http://18.225.8.106:5000/{username}/youtube/search_comments_text", method="get", name="search_comment_form")
                 hr()
             # Search cid field
             # with form(action=f"http://18.225.8.106:5000/{username}/youtube/search_comments_cid", method="get",name="search_cid_form"):
                 p('Search base CID for threads:')
                 input_(type='text', name='cid_search_input', value=cid_search_value, cls="text_input")
-                input_(type='submit', value="Send", formaction=f"http://18.225.8.106:5000/{username}/youtube/search_comments_cid", method="get",name="search_cid_form")
+                input_(type='submit', value="Search", formaction=f"http://18.225.8.106:5000/{username}/youtube/search_comments_cid", method="get",name="search_cid_form")
                 hr()
             # Data Analysis buttons
             # with form(action=f"http://18.225.8.106:5000/{username}/youtube/sort_comments", method="get", name="count_analysis_form"):
@@ -193,13 +209,29 @@ class drawHTML:
                 # button('Count and sort by # of comments', type="submit", onclick="alert(document.getElementById('unEntry').value)")
                 input_(type="submit", value='Count and sort by # of comments',
                        formaction=f"http://18.225.8.106:5000/{username}/youtube/sort_most_comments", method="get",
-                       name='comment_count_input')
+                       name='comment_count_input', title="Click to count comments for each author, and sort by # of comments.")
                 input_(type="submit", value='Count # of author comments',
                        formaction=f"http://18.225.8.106:5000/{username}/youtube/sort_author_alpha", method="get",
-                       name='author_count_input')
-                input_(type="submit", value='Count # of word occurences',
+                       name='author_count_input', title="Click to count comments for each author, and sort Author Alphabetically.")
+                input_(type="submit", value='Count # of word occurrences',
                        formaction=f"http://18.225.8.106:5000/{username}/youtube/sort_most_common_words", method="get",
-                       name='word_count_input')
+                       name='word_count_input', title="Click to count the occurences of each word, and sort by #.")
+
+                # Data Analysis buttons V2: queue implementation
+                # with form(action=f"http://18.225.8.106:5000/{username}/youtube/sort_comments", method="get", name="count_analysis_form"):
+                p('Data Analysis buttons(SQS):', title="This set of buttons utilizes the AWS SQS.")
+                # button('Count and sort by # of comments', type="submit", onclick="alert(document.getElementById('unEntry').value)")
+                input_(type="submit", value='Count and sort by # of comments',
+                       formaction=f"https://sqs.us-east-2.amazonaws.com/669773239329/MyYTCDL_Queue", method="post",
+                       name='comment_count_input',
+                       title="Click to count comments for each author, and sort by # of comments.")
+                input_(type="submit", value='Count # of author comments',
+                       formaction=f"https://sqs.us-east-2.amazonaws.com/669773239329/MyYTCDL_Queue", method="post",
+                       name='author_count_input',
+                       title="Click to count comments for each author, and sort Author Alphabetically.")
+                input_(type="submit", value='Count # of word occurrences',
+                       formaction=f"https://sqs.us-east-2.amazonaws.com/669773239329/MyYTCDL_Queue", method="post",
+                       name='word_count_input', title="Click to count the occurences of each word, and sort by #.")
 
             if formDict is None:
                 with p(id="page-BOT"):
@@ -216,12 +248,16 @@ class drawHTML:
         if showAllFields:
             setDivWidth = "width: 50%;"
         # dataDisplayColumnStyle = f"background-color:#DBE9EE; height: 100%; {setDivWidth}; overflow-x:auto;"
-        dataDisplayColumnStyle = f"background-color:#DBE9EE; height: 100%; width: 100%; overflow-x:auto;"
+        break_long_words_style = f"overflow-wrap: break-word;  word-wrap: break-word;  word-break: break-all;  word-break: break-word;  hyphens: auto;"
+        dataDisplayColumnStyle = f"background-color:#AAFFEE; height: 100%; width: 100%;"# overflow-x:auto;"
+        dataDisplayEntryColumnStyle = f"width:8%;"  # overflow-x:auto;"
+        dataDisplayCommentColumnStyle = f"width:50%;"  # overflow-x:auto;"
+        dataDisplayCidColumnStyle = f"width:20%;"  # word-wrap: break-all;overflow-x:auto;"
 
         with div(cls="column", id="dataDisplayColumn", style=dataDisplayColumnStyle):  # cls="column middle"
             #
             p('Data Display:')
-            with table(style="width: 20%;"):  # style="width: 50%;"
+            with table(style="width: 80%; table-layout: fixed;"):  # style="width: 50%;"
                 with thead():
                     tableHeaderRow = tr()
                     if showAllFields:
@@ -230,11 +266,11 @@ class drawHTML:
                         for headerValue in self.videoData['1'].keys():  # add all fields
                             tableHeaderRow.add(td(headerValue))
                     else:
-                        tableHeaderRow.add(td("Entry #"))
-                        tableHeaderRow.add(td("Authors"))
-                        tableHeaderRow.add(td("Entry Time"))
-                        tableHeaderRow.add(td("Comment"))
-                        tableHeaderRow.add(td("Comment ID"))
+                        tableHeaderRow.add(td("Entry #", style=dataDisplayEntryColumnStyle+break_long_words_style))
+                        tableHeaderRow.add(td("Authors", style=break_long_words_style))
+                        tableHeaderRow.add(td("Entry Time", style=break_long_words_style))
+                        tableHeaderRow.add(td("Comment", style=dataDisplayCommentColumnStyle))#dataDisplayCommentColumnStyle
+                        tableHeaderRow.add(td("Comment ID", style=dataDisplayCidColumnStyle+break_long_words_style))#dataDisplayCidColumnStyle
                     pass
                 with tbody():
                     for entry in self.videoData:
@@ -253,16 +289,15 @@ class drawHTML:
                                 tableDataRow.add(td(str(tempData)))
                         else:
                             tableDataRow.add(td(entry))
-                            tableDataRow.add(td(comment["author"]))
+                            tableDataRow.add(td(comment["author"], style=break_long_words_style))
                             tableDataRow.add(td(comment["time"]))
 
                             tempData = comment["text"]
                             # print("drawYoutubeDownloader_CommentData: text surrogate removal, pre: ",tempData)
                             tempData = self.remove_surrogates(tempData)
                             # print(f"drawYoutubeDownloader_CommentData: text surrogate removal, post: {tempData}\n")
-                            tableDataRow.add(td(tempData))
-
-                            tableDataRow.add(td(comment["cid"]))
+                            tableDataRow.add(td(tempData, style=dataDisplayCommentColumnStyle))#dataDisplayCommentColumnStyle
+                            tableDataRow.add(td(comment["cid"], style=dataDisplayCidColumnStyle+break_long_words_style))#dataDisplayCidColumnStyle
                     pass
                 with tfoot():
                     tableFooterRow = tr()
@@ -286,52 +321,9 @@ class drawHTML:
 
     # @staticmethod
     def drawYoutubeDownloader(self, name):
-            print("Start: drawYoutubeDownloader")
-            doc = document(title='YT Comment DownLoader')
-            # false = "False"
-
-            with doc.head:
-                link(rel='stylesheet', href='login2_style.css')
-                script(type='text/javascript', src='script.js')
-                style(self.getStyle())
-
-            with doc:
-                h1('Hello from Dominate!')
-                p(text('This is a page generated using the Dominate library by Kino. '), a('>Kino Link<', href='https://github.com/Knio/dominate'))
-                p('This page is created to interface as the YoutubeCommentDownloader web GUI.')
-
-                with div(cls="row") as dataentryDiv:
-                    with p(id="page-TOP"):
-                        a('Goto Page Top', href='#page-TOP')
-                    with p():
-                        a('Goto Page Bottom', href='#page-BOT')
-
-                    # data entry Column
-                    # dataentryDiv +=
-                    self.drawDataEntryColumn(username=name)
-
-                    # data display Column
-                    showAllFields = False
-                    setDivWidth = "width: 100%;"
-
-                    if showAllFields:
-                        setDivWidth = "width: 50%;"
-                    # dataDisplayColumnStyle = f"background-color:#DBE9EE; height: 100%; {setDivWidth}; overflow-x:auto;"
-                    dataDisplayColumnStyle = f"background-color:#DBE9EE; height: 100%; width: 50%; overflow-x:auto;"
-
-                    # with p(id="page-BOT"):
-                    #     a('Goto Page Top', href='#page-TOP')
-                    # with p():
-                    #     a('Goto Page Bottom', href='#page-BOT')
-
-            # print(doc)
-            # print(doc.render(pretty=True))
-            return doc.render(pretty=True)
-
-    # @staticmethod
-    def drawYoutubeDownloader_CommentData(self, username, formDict, showAllFields = False):
-        print("Start: drawYoutubeDownloader_CommentData")
+        print("Start: drawYoutubeDownloader")
         doc = document(title='YT Comment DownLoader')
+        # false = "False"
 
         with doc.head:
             link(rel='stylesheet', href='login2_style.css')
@@ -343,17 +335,76 @@ class drawHTML:
             p(text('This is a page generated using the Dominate library by Kino. '), a('>Kino Link<', href='https://github.com/Knio/dominate'))
             p('This page is created to interface as the YoutubeCommentDownloader web GUI.')
 
-            with p(id="page-TOP"):
-                a('Goto Page Top', href='#page-TOP')
-            with p():
-                a('Goto Page Bottom', href='#page-BOT')
+            with div(cls="row") as dataentryDiv:
+                with p(id="page-TOP"):
+                    a('Goto Page Top', href='#page-TOP')
+                with p():
+                    a('Goto Page Bottom', href='#page-BOT')
 
-            with div(cls="row"):
-                #data entry Column
-                self.drawDataEntryColumn(username, formDict)
+                # data entry Column
+                # dataentryDiv +=
+                self.drawDataEntryColumn(username=name)
 
-                #data display Column
-                self.drawDataDisplayColumn(showAllFields)
+                # data display Column
+                showAllFields = False
+                setDivWidth = "width: 100%;"
+
+                if showAllFields:
+                    setDivWidth = "width: 50%;"
+                # dataDisplayColumnStyle = f"background-color:#DBE9EE; height: 100%; {setDivWidth}; overflow-x:auto;"
+                dataDisplayColumnStyle = f"background-color:#DBE9EE; height: 100%; width: 50%; overflow-x:auto;"
+
+                # with p(id="page-BOT"):
+                #     a('Goto Page Top', href='#page-TOP')
+                # with p():
+                #     a('Goto Page Bottom', href='#page-BOT')
+
+        # print(doc)
+        # print(doc.render(pretty=True))
+        return doc.render(pretty=True)
+
+    # @staticmethod
+    def drawYoutubeDownloader_CommentData(self, username, formDict, showAllFields = False):
+        print("Start: drawYoutubeDownloader_CommentData")
+        doc = document(title='YT Comment DownLoader')
+
+        with doc.head:
+            link(rel='stylesheet', href='login2_style.css')
+            script(type='text/javascript', src='script.js')
+            style(self.getStyle())
+
+        with doc.body:  #731
+            with div(id='header', align="center", style="background-color:#439775;"):
+                #p('-----------------------------I am a header')
+                self.drawTopNavBar()
+
+            with div(id="mainPageDiv", cls="content", align="center",style="background-color:#48BF84;"):#margin-top: 90px;
+                p(".")
+                p(".")
+                p(" ")
+                h1('Hello from Dominate!')
+                p(text('This is a page generated using the Dominate library by Kino. '), a('>Kino Link<', href='https://github.com/Knio/dominate'))
+                p('This page is created to interface as the YoutubeCommentDownloader web GUI.')
+
+                with p(id="page-TOP"):
+                    a('Goto Page Top', href='#page-TOP')
+                with p():
+                    a('Goto Page Bottom', href='#page-BOT')
+
+                with div(cls="row", style="background-color:#61D095;"):
+                    #data entry Column
+                    self.drawDataEntryColumn(username, formDict)
+
+                    #data display Column
+                    self.drawDataDisplayColumn(showAllFields)
+            with div(id='footer', style="background-color:#E0BAD7;"):
+                #p('-----------------------------I am a footer')
+                with p(id="page-BOT"):
+                    a('Goto Page Top', href='#page-TOP')
+                with p():
+                    a('Goto Page Bottom', href='#page-BOT')
+                pass
+
 
         # print(doc)
         # print(doc.render(pretty=True))
@@ -439,47 +490,64 @@ class drawHTML:
         print(f"selectPainting: myDownloadSession: {myDownloadSession.loadNumComments}")
         if 'url_input_form' in request.args:
             print(f"selectPainting: found url_input_form:")
-            # self.videoData = myDownloadSession.getYTComments()
-            self.videoData = myDownloadSession.loadVideoComments(name) #Implement comment loading logic
+            self.videoData = myDownloadSession.getYTComments()
+            # self.videoData = myDownloadSession.loadVideoComments(name) #Implement comment loading logic
             return self.draw_url_input_form(name, formDict)
         elif "search_author_form" in request.args:
             print(f"selectPainting: found search_author_form:")
-            self.videoData = myDownloadSession.getYTComments()
+            # self.videoData = myDownloadSession.getYTComments()
+            self.videoData = myDownloadSession.loadVideoComments(name)  # Implement comment loading logic
             self.videoData = myDownloadSession.searchYTComments("author")
             # self.videoData = myDownloadSession.loadVideoComments() #Implement comment loading logic
             return self.draw_search_form(name, formDict)
             # return self.draw_search_author_form(formDict)
+        elif "display_all_form" in request.args:
+            print(f"selectPainting: found display_all_form:")
+            # self.videoData = myDownloadSession.getYTComments()
+            self.videoData = myDownloadSession.loadVideoComments(name)  # Implement comment loading logic
+            self.videoData = myDownloadSession.searchYTComments("author")
+            # self.videoData = myDownloadSession.loadVideoComments() #Implement comment loading logic
+            un_search_value = formDict["un_search_input"]
+            print(f"selectPainting: display_all_form: will delete un_search_value {un_search_value}")
+            formDict["un_search_input"] = ""
+            return self.draw_search_form(name, formDict)
+            # return self.draw_search_author_form(formDict)
         elif "search_comment_form" in request.args:
             print(f"selectPainting: found search_comment_form:")
-            self.videoData = myDownloadSession.getYTComments()
+            # self.videoData = myDownloadSession.getYTComments()
+            self.videoData = myDownloadSession.loadVideoComments(name)
             self.videoData = myDownloadSession.searchYTComments("text")
             # self.videoData = myDownloadSession.loadVideoComments() #Implement comment loading logic
             return self.draw_search_form(name, formDict)
             # return self.draw_search_comment_form(formDict)
         elif "search_cid_form" in request.args:
             print(f"selectPainting: found search_cid_form:")
-            self.videoData = myDownloadSession.getYTComments()
+            # self.videoData = myDownloadSession.getYTComments()
+            self.videoData = myDownloadSession.loadVideoComments(name)
             self.videoData = myDownloadSession.searchYTComments("cid")
             # self.videoData = myDownloadSession.loadVideoComments() #Implement comment loading logic
             return self.draw_search_form(name, formDict)
             # return self.draw_search_cid_form(formDict)
         elif "comment_count_input" in request.args:
             print(f"selectPainting: found comment_count_input:")
-            self.videoData = myDownloadSession.getYTComments()
+            # self.videoData = myDownloadSession.getYTComments()
+            self.videoData = myDownloadSession.loadVideoComments(name)
             self.videoData = myDownloadSession.countAuthors("count")
             # self.videoData = myDownloadSession.loadVideoComments() #Implement comment loading logic
             # return self.draw_url_input_form(name, formDict)
             return self.draw_count_analysis_form(name, formDict)
         elif "author_count_input" in request.args:
             print(f"selectPainting: found author_count_input:")
-            self.videoData = myDownloadSession.getYTComments()
+            # self.videoData = myDownloadSession.getYTComments()
+            self.videoData = myDownloadSession.loadVideoComments(name)
             self.videoData = myDownloadSession.countAuthors("author")
             # self.videoData = myDownloadSession.loadVideoComments() #Implement comment loading logic
             # return self.draw_url_input_form(name, formDict)
             return self.draw_count_analysis_form(name, formDict)
         elif "word_count_input" in request.args:
             print(f"selectPainting: found author_count_input:")
-            self.videoData = myDownloadSession.getYTComments()
+            # self.videoData = myDownloadSession.getYTComments()
+            self.videoData = myDownloadSession.loadVideoComments(name)
             self.videoData = myDownloadSession.countWords("count")
             return self.draw_count_analysis_form(name, formDict)
         else:

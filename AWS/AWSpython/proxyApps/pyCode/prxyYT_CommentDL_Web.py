@@ -16,7 +16,13 @@ from itertools import islice #used to extract youtube comment data
 # from tkinter.scrolledtext import ScrolledText
 
 
-class DownloadSession():
+# def print_log(logMessage):
+#     time_stamp=datetime.datetime.today()
+#     print(f"{time_stamp}: {logMessage}")
+#     return f"{time_stamp}: {logMessage}"
+
+
+class DownloadSession:
     def __init__(self, form=None):
         
         self.entry_for_link = None
@@ -42,17 +48,40 @@ class DownloadSession():
 
     
 # ---------------------------- Save ------------------------------- #
+
     def getYoutubeVideoID(self):
         import urllib.parse as urlparse
         youtube_url = self.entry_for_link
         url_data = urlparse.urlparse(youtube_url)
-
         query = urlparse.parse_qs(url_data.query)
-        video = query["v"][0]
+        videoID="temp"
+
+        aKeyList = list(query.keys())
+        print(f"getYoutubeVideoID: aKeyList: {aKeyList}")
+        for entry in query:
+            print(f"getYoutubeVideoID: Entry: {entry}")
+            print(f"getYoutubeVideoID: query[entry]: {query[entry]}")
+
+        try:
+            videoID = query["v"][0]
+            pass
+        except Exception as err:
+            print(f"getYoutubeVideoID: Error: {err}")
+            videoIDhc=youtube_url[32:]
+            print(f"getYoutubeVideoID: video hardcode cut: {videoIDhc}")
+            return videoIDhc
+            pass
+        else:
+            print(f"getYoutubeVideoID: {videoID}")
+            return videoID
+            pass
+
+
         # print(f"getYoutubeVideoID: {video}")
-        return video
+        return videoID
 
     def saveYTComment(self):
+        print_log(f"saveYTComment: Start")
         files = [('All Files', '*.*'),
                  ('Python Files', '*.py'),
                  ('Text Document', '*.txt')]
@@ -104,8 +133,39 @@ class DownloadSession():
 
 #############################------------------Gui Functions-------------------###############################
     def loadVideoComments(self, name): #Implement comment loading logic
-        print(f"loadVideoComments: name:{name}")
+        print_log(f"loadVideoComments: name: {name}")
+        returnDict={}
         videoID = self.getYoutubeVideoID()+"_CommentData.json"
+        myCommentFilePath = f"{self.workingDir}/{videoID}"
+
+        if not os.path.exists(myCommentFilePath):
+            print_log(f"loadVideoComments: path not found: {myCommentFilePath}")
+            return returnDict
+
+        with open(myCommentFilePath, 'r+') as myFile:
+            if myFile:
+                # File was selected, you can now work with the file_path
+                print_log(f"loadVideoComments: myFile: {myFile}")
+                print_log(f"loadVideoComments: myFile.name: {myFile.name}")
+
+                try:
+                    returnDict = json.load(myFile)
+                    aKeyList = list(returnDict.keys())
+                    #print(f"loadVideoComments: myFile.name.keyList: {aKeyList}")
+                except json.decoder.JSONDecodeError as err:
+                    print_log(f"loadVideoComments: jsonDecodeError: {err}")
+                    myFile.seek(0)
+                    json.dump(self.comment_dict, myFile, indent=4, default=str)
+                    myFile.truncate()
+                    print_log(f"loadVideoComments: jsonDecodeError resolved!")
+                else:
+                    print_log(f"loadVideoComments: fileData loaded")
+                    # print(f"loadVideoComments: fileData: {fileData}")
+                    # fileData.update(myDownloadSession.comment_dict) #Dont want to update since my
+                    # fileData = combineCommentDicts(fileData, myDownloadSession.comment_dict)
+                    self.comment_dict = returnDict
+                    return returnDict
+        return returnDict
         #3 methods to get video data
         if videoID in self.getVideoList():
             #2 Load from saved file
@@ -117,10 +177,10 @@ class DownloadSession():
             #1 load from ytdl mod. Takes time?
             returnDict = self.getYTComments()
             try:
-                print("run saveYTComment")
+                print("loadVideoComments: run saveYTComment")
                 self.saveYTComment()
             except Exception as error:
-                print("An exception occurred: ", error)
+                print("loadVideoComments: An exception occurred: ", error)
                 traceback.print_exc()
                 print()
                 print()
@@ -131,6 +191,8 @@ class DownloadSession():
     def getVideoList(self):
         print("Start readYTComments")
         videoList = []
+        print(os.listdir())
+
         return videoList
     def queryVideoList(self):
         print("Start readYTComments")
@@ -147,6 +209,7 @@ class DownloadSession():
         pass
 
     def getYTComments(self):
+        print_log("getYTComments:")
         myCommentFilePath = self.workingDir+"/tempYTComments.json"
         myCommentText = ""
         youtube_url = "https://www.youtube.com/watch?v=c52IzePdOag" #
@@ -171,7 +234,7 @@ class DownloadSession():
             
             self.comment_dict.update({count:comment})
             #print("getYTComments: self.comment_dict[count]: ", self.comment_dict[count])
-            print(f"\rLoading... {count*(100/self.loadNumComments) }%", end="")
+            # print(f"\rLoading... {count*(100/self.loadNumComments) }%", end="")
             #print("\n")
             for item in comment:
                 if "time_parsed" in item:
@@ -196,14 +259,16 @@ class DownloadSession():
         #Cleanup
         print("\n")
         #os.remove(myCommentText)
+        self.saveYTComment()
         return self.comment_dict
 
     def searchYTComments(self, option):
-        print("Start searchYTComments")
+        print_log("Start searchYTComments")
         print("searchYTComments: option: ", option)
         returnList = {}
         
         #print("getYTComments: len(myCommentText): ", len(json.dumps(myCommentText) ))
+        print(f"getYTComments: len(myCommentText): {len(self.comment_dict)}")
         count=1
         if "author" in option:
             userSearch = self.entry_for_un_search
@@ -228,7 +293,7 @@ class DownloadSession():
         return returnList
 
     def countAuthors(self, option="author"):
-        print("Start countAuthors")
+        print_log("Start countAuthors")
         print("countAuthors: option: ",option)
         authorList={}
         
@@ -282,7 +347,7 @@ class DownloadSession():
         pass
 
     def countWords(self, option="alpha"):
-        print("Start coundWords")
+        print_log("Start coundWords")
 
         wordList = {}
         # ------------------myDownloadSession.label_for_comments.delete("1.0", 'end')  # "1.0", "end"
@@ -371,3 +436,9 @@ class DownloadSession():
             countloops += 1
 
         return returnDict
+
+
+def print_log(logMessage):
+    time_stamp=datetime.datetime.today()
+    print(f"{time_stamp}: {logMessage}")
+    return f"{time_stamp}: {logMessage}"
