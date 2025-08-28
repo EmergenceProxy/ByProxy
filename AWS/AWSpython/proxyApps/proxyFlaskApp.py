@@ -1,4 +1,4 @@
-from flask import Flask, redirect, url_for, request
+from flask import Flask, redirect, url_for, request, render_template
 from pyCode.pageSketchBook import drawHTML
 # from dominate.tags import *
 # from dominate import document
@@ -7,11 +7,10 @@ from pyCode.pageSketchBook import drawHTML
 app = Flask(__name__)
 
 myArtist =  drawHTML()
-
+htmlDir = "/home/proxyApps/appData/ytcData"
+workingDir = "/home/proxyApps/appData/ytcData"
     
-##############################################
-
-
+#################################################Dominate Examples#################################
 
 def drawDominateExample():
     doc = document(title='My Dominate Example')
@@ -43,9 +42,11 @@ def hello():
 def success(name):
     return 'welcome %s' % name
 
+#################################################Youtube Methods###################################
 
 @app.route('/<username>/youtube/')
 def alt_load_youtube(username):
+    print("Start: alt_load_youtube")
     return load_youtube(username)
     # return redirect(url_for('load_youtube', name=username))
 
@@ -109,8 +110,7 @@ def sort_most_common_words(name):
     return youtubeCommentPageHtml
     pass
 
-
-
+###########################################Login Methods##########################################
 
 @app.route('/<name>/pwtool')
 def load_pwtool(name):
@@ -118,6 +118,25 @@ def load_pwtool(name):
     return pwToolPageHtml
     #return 'welcome %s' % name
 
+
+@app.route('/login_Test', methods=['POST', 'GET'])
+def login_Test():
+    userList = ["proxy", "irf", "gio", "njefferson"]
+    print(f"login: request: {request}")
+    print(f"login: request.method: {request.method}")
+    print(f"login: request.form: {request.form}")
+    user = ""
+    if request.method == 'POST':
+        user = request.form['usrnm']
+        userPW = request.form['usrpw']
+
+        print(f"login: user: {user}")
+        print(f"login: userPW: {userPW}")
+        return redirect(url_for('load_youtube', name=user))
+    elif request.method == 'GET':
+        return render_template('login2_template.html')
+
+    return '404 error username not authorized %s' % user
 
 @app.route('/login', methods=['POST', 'GET'])
 def login():
@@ -147,6 +166,7 @@ def login():
         user = request.args.get('nm')
         return redirect(url_for('success', name=user))
 
+###################################################################################################
 
 if __name__ == '__main__':
     app.run(debug=True)
