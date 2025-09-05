@@ -15,11 +15,11 @@ installLinuxPackages() {
 	
 	# install httpd (Linux 2 version)
 	yum install -y httpd
-	writeLog "Main: httpd installed"
+	writeLog "installLinuxPackages: httpd installed"
 	
 	#install git
 	yum install -y git
-	writeLog "Main: git installed"
+	writeLog "installLinuxPackages: git installed"
 }
 
 moveFiles() {
@@ -28,13 +28,13 @@ moveFiles() {
 	cd /home
 	git clone https://github.com/EmergenceProxy/ByProxy.git
 
-	writeLog "Main: git repo cloned"
+	writeLog "moveFiles: git repo cloned"
 	#mkdir proxyHome
 	moveHtmlFiles
 	movePythonFiles
 	
 	rm -rf ByProxy/
-	writeLog "Main: git repo removed"
+	writeLog "moveFiles: git repo removed"
 }
 
 moveHtmlFiles(){
@@ -48,12 +48,15 @@ moveHtmlFiles(){
 	
 	#Todo: Move html related files in github to AWShtml folder
 	mv /home/ByProxy/AWS/AWShtml /var/www/html
+	writeLog "moveHtmlFiles: html files moved"
 }
 movePythonFiles(){
 	mv /home/ByProxy/AWS/AWSpython/proxyApps /home/
+	writeLog "movePythonFiles: python files moved"
 }
 
 startServices(){
+	writeLog "startServices: Initalize"
 	ytcDLWorkingDir="/home/proxyApps/appData/ytcData"
 	
 	#startHttpd
@@ -62,6 +65,8 @@ startServices(){
 	
 	#startYtcdl
 	startYtcdl
+	
+	writeLog "startServices: Complete"
 }
 
 startYtcdl(){
