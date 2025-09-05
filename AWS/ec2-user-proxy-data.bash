@@ -15,7 +15,7 @@ echo "<h1>Hello World from the RustDesk Server @ $(hostname -f)</h1>" > /var/www
 
 
 # install docker
-yum install docker -y
+yum install -y docker
 service docker start
 #Verify docker installation
 docker --version
@@ -45,7 +45,7 @@ sudo docker run --name hbbr -v ./data:/root -td --net=host --restart unless-stop
 
 
 #install git
-yum install git
+yum install -y git
 
 #Create directories for apps to run and store data.
 #mkdir proxyApps
