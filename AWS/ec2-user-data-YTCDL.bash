@@ -47,7 +47,7 @@ moveHtmlFiles(){
 	#mv /home/ByProxy/AWS/AWSpython/proxyApps/login2_style.css /$htmlFilesDir/.
 	
 	#Todo: Move html related files in github to AWShtml folder
-	mv /home/ByProxy/AWS/AWShtml /var/www/html
+	mv /home/ByProxy/AWS/AWShtml/* /var/www/html
 	writeLog "moveHtmlFiles: html files moved"
 }
 movePythonFiles(){
