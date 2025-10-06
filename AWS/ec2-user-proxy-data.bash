@@ -77,6 +77,7 @@ pip install dominate
 pip install urllib3==1.26.6
 pip install youtube_comment_downloader
 pip install scrapetube
+pip install boto3
 
 
 #touch hello.py
