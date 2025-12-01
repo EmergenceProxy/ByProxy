@@ -77,7 +77,9 @@ pip install dominate
 pip install urllib3==1.26.6
 pip install youtube_comment_downloader
 pip install scrapetube
-pip install boto3
+pip install boto3 #AWS SDK
+pip install authlib werkzeug flask requests #AWS Cognito library
+
 
 
 #touch hello.py

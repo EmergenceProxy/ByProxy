@@ -7,7 +7,7 @@ import sys
 
 class DynamoDB_interface:
     # Class attribute
-    species = "Canis familiaris"
+    species = "Canis_familiaris"
 
     def __init__(self, table_name="fromStore", region_name='us-east-2'):
         # Instance attributes

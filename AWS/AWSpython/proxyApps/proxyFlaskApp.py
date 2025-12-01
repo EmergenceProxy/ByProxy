@@ -1,10 +1,25 @@
-from flask import Flask, redirect, url_for, request, render_template
+from flask import Flask, redirect, url_for, request, render_template, session
 from pyCode.pageSketchBook import drawHTML
+from authlib.integrations.flask_client import OAuth #AWS Cognito library
+import os #AWS Cognito library
 # from dominate.tags import *
 # from dominate import document
 
 
 app = Flask(__name__)
+
+#AWS Cognito integration
+app.secret_key = os.urandom(24)  # Use a secure random key in production
+oauth = OAuth(app)
+
+oauth.register(
+  name='oidc',
+  authority='https://cognito-idp.us-east-1.amazonaws.com/us-east-1_G2BaxE5ce',
+  client_id='9pf0mnv8c2d7tahf5homs3qlu',
+  client_secret='<client secret>',
+  server_metadata_url='https://cognito-idp.us-east-1.amazonaws.com/us-east-1_G2BaxE5ce/.well-known/openid-configuration',
+  client_kwargs={'scope': 'phone openid email'}
+)
 
 myArtist =  drawHTML()
 htmlDir = "/home/proxyApps/appData/ytcData"
@@ -33,16 +48,66 @@ def drawDominateExample():
     # print(doc.render(pretty=True))
     return doc.render(pretty=True)
 
-@app.route('/')
-def hello():
-        return 'Hello from Flask on EC2!'
+# @app.route('/')
+# def hello():
+#         return 'Hello from Flask on EC2!'
 
 
 @app.route('/success/<name>')
 def success(name):
     return 'welcome %s' % name
 
-#################################################Youtube Methods###################################
+################################### AWS Cognito integration ###########################
+@app.route('/')
+def index():
+    user = session.get('user')
+    print(f"=================index: {user}")
+    app.logger.info(f"=================index: {user}") # (DEBUG, INFO, WARNING, ERROR, CRITICAL)
+    app.logger.warning(f"=================index: {user}")
+
+    if user:
+        return  f'Hello, {user["email"]}. <a href="/logout">Logout</a>'
+
+    else:
+        return (f' '
+                f'Welcome! Please <a href="/cog_login">Login</a>.'
+                f'<p>Or if you\'re leaving =[ <p>Goodbye! Click <a href="/logout">Logout</a>.')
+
+@app.route('/cog_login')
+def cog_login():
+    print(f"====================Start cog_login.")
+    # Alternate option to redirect to /authorize
+    redirect_uri = url_for('authorize', _external=True)
+    print(f"cog_login: redirect_uri: {redirect_uri}")
+    # return oauth.oidc.authorize_redirect(redirect_uri)
+
+    return oauth.oidc.authorize_redirect('https://d84l1y8p4kdic.cloudfront.net')
+
+@app.route('/authorize')
+def authorize():
+    print(f"Start authorize.")
+
+    token = oauth.oidc.authorize_access_token()
+    print(f"authorize: token: {token}")
+
+    user = token['userinfo']
+    print(f"authorize: user: {user}")
+
+    session['user'] = user
+
+    return load_youtube(user)
+    # return redirect(url_for('index'))
+
+@app.route('/logout')
+def logout():
+    session.pop('user', None)
+    return redirect(url_for('index'))
+    #return redirect("http://18.225.8.106/")
+
+# if __name__ == '__main__':
+#     app.run(debug=True)
+
+####################################### Youtube Methods ###################################
 
 @app.route('/<username>/youtube/')
 def alt_load_youtube(username):
@@ -107,6 +172,13 @@ def sort_author_alpha(name):
 def sort_most_common_words(name):
     print("Start: sort_most_common_words")
     youtubeCommentPageHtml = myArtist.selectPainting(name, request)
+    return youtubeCommentPageHtml
+    pass
+
+@app.route('/<name>/youtube/tables', methods=['GET'])
+def display_tables(name):
+    print("Start: display_tables")
+    youtubeCommentPageHtml = myArtist.drawYoutubeTables(name)
     return youtubeCommentPageHtml
     pass
 
