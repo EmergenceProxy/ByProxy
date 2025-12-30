@@ -17,7 +17,7 @@ class drawHTML:
     myDownloadSession = DownloadSession()
     videoData = {}
     homeIpAddress = "http://13.58.4.21"
-
+    sentiment_result={}
 ##############################-Helper Functions-##########################################
     # @staticmethod
     def remove_surrogates(self, mytext):
@@ -165,7 +165,7 @@ class drawHTML:
             pass
         return FooterBarDiv
 
-    def drawDataEntryColumn(self, username, formDict=None, homeIpAddress="http://13.58.4.21"):
+    def drawDataEntryColumn(self, username, formDict=None,isSemantic=False, homeIpAddress="http://13.58.4.21"):
         url_input_value = ""
         # homeIpAddress = "http://13.58.4.21"
         if formDict is not None:
@@ -227,6 +227,9 @@ class drawHTML:
             # with form(action=f"{homeIpAddress}:5000/{username}/youtube/sort_comments", method="get", name="count_analysis_form"):
                 p('Data Analysis buttons:')
                 # button('Count and sort by # of comments', type="submit", onclick="alert(document.getElementById('unEntry').value)")
+                input_(type="submit", value='Sentiment Analysis',
+                       formaction=f"{homeIpAddress}:5000/{username}/youtube/sentiment_analysis_input", method="get",
+                       name='sentiment_analysis_input', title="click to get a sentiment analysis on the comments returned by the tool.")
                 input_(type="submit", value='Count and sort by # of comments',
                        formaction=f"{homeIpAddress}:5000/{username}/youtube/sort_most_comments", method="get",
                        name='comment_count_input', title="Click to count comments for each author, and sort by # of comments.")
@@ -236,7 +239,18 @@ class drawHTML:
                 input_(type="submit", value='Count # of word occurrences',
                        formaction=f"{homeIpAddress}:5000/{username}/youtube/sort_most_common_words", method="get",
                        name='word_count_input', title="Click to count the occurences of each word, and sort by #.")
-
+                if (isSemantic):
+                    overall_sentiment = self.sentiment_result["overall_sentiment"]
+                    summary = self.sentiment_result["summary"]
+                    with table(style="width: 80%; table-layout: fixed;"):  # style="width: 50%;"
+                        with thead():
+                            tableHeaderRow = tr()
+                            tableHeaderRow.add(td("Overall Sentiment", style=dataDisplayEntryColumnStyle+break_long_words_style))
+                            tableHeaderRow.add(td("Summary", style=break_long_words_style))
+                        with tbody():
+                            tableDataRow = tr()
+                            tableDataRow.add(td(overall_sentiment))
+                            tableDataRow.add(td(summary))
                 # Data Analysis buttons V2: queue implementation
                 # with form(action=f"{homeIpAddress}:5000/{username}/youtube/sort_comments", method="get", name="count_analysis_form"):
                 # p('Data Analysis buttons(SQS):', title="This set of buttons utilizes the AWS SQS.")
@@ -383,7 +397,7 @@ class drawHTML:
         return doc.render(pretty=True)
 
     # @staticmethod
-    def drawYoutubeDownloader_CommentData(self, username, formDict, showAllFields = False):
+    def drawYoutubeDownloader_CommentData(self, username, formDict, showAllFields = False,isSemantic=False):
         print("Start: drawYoutubeDownloader_CommentData")
         doc = document(title='YT Comment DownLoader')
 
@@ -404,7 +418,7 @@ class drawHTML:
 
                 with div(cls="row", style="background-color:#61D095;"):
                     #data entry Column
-                    self.drawDataEntryColumn(username, formDict)
+                    self.drawDataEntryColumn(username, formDict,isSemantic)
 
                     #data display Column
                     self.drawDataDisplayColumn(showAllFields)
@@ -701,10 +715,14 @@ class drawHTML:
         print(f"selectPainting: form: {formDict}")
         return self.drawYoutubeDownloader_CommentData(name, formDict, showAllFields=False)
         pass
-
+    def draw_sentament_analysis_data(self, name, formDict):
+        print("Start: sentiment_analysis_input")
+        print(f"selectPainting: form: {formDict}")
+        return self.drawYoutubeDownloader_CommentData(name, formDict, showAllFields = True,isSemantic=True)
+       
     def draw_count_analysis_form(self, name, formDict):
         print("Start: draw_count_analysis_form")
-        print(f"selectPainting: form: {form}")
+        print(f"selectPainting: form: {formDict}")
         return self.drawYoutubeDownloader_CommentData(name, formDict, showAllFields = True)
         pass
 
@@ -727,7 +745,7 @@ class drawHTML:
         global myDownloadSession
         myDownloadSession = DownloadSession(formDict)
         print(f"selectPainting: myDownloadSession: after")
-        print(f"selectPainting: myDownloadSession: {myDownloadSession.loadNumComments}")
+        print(f"selectPainting: myDownloadSession: {myDownloadSession.loadNumComments}")       
         if 'url_input_form' in request.args:
             print(f"selectPainting: found url_input_form:")
             self.videoData = myDownloadSession.getYTComments()
@@ -790,6 +808,13 @@ class drawHTML:
             self.videoData = myDownloadSession.loadVideoComments(name)
             self.videoData = myDownloadSession.countWords("count")
             return self.draw_count_analysis_form(name, formDict)
+        elif "sentiment_analysis_input" in request.args:
+            print(f"selectPainting: found sentiment_analysis_input:")
+            # self.videoData = myDownloadSession.getYTComments()
+            self.videoData = myDownloadSession.loadVideoComments(name)
+            self.sentiment_result = myDownloadSession.getSentiment(name)
+            return self.draw_sentament_analysis_data(name, formDict)
+        #TODO add input from button to go to generate sentiment analysis
         else:
             return self.drawYoutubeDownloader(name)
 
