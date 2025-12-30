@@ -91,7 +91,7 @@ class drawHTML:
             """
         pass
 
-    def drawTopNavBar(self, homeIpAddress="http://13.58.4.21"):
+    def drawTopNavBar(self, homeIpAddress="http://13.58.4.21", page="main"):
 
         topNavBarDivStyle = """ 
         background-color:#2A4747; 
@@ -139,8 +139,9 @@ class drawHTML:
                     pass
                 with a('Reset YT Comment Download', href=f"{homeIpAddress}:5000/proxy/youtube", style=topNavBarItemStyle):
                     pass
-                with a('YT Comment Tables', href=f"{homeIpAddress}:5000/proxy/youtube/tables", style=topNavBarItemStyle):
-                    pass
+                if page == "main":
+                    with a('YT Comment Tables', href=f"{homeIpAddress}:5000/proxy/youtube/tables", style=topNavBarItemStyle):
+                        pass
                 with a('Goto PageTop', href='#page-TOP', style=topNavBarItemStyle, id="page-TOP"):
                     pass
                 with a('Goto Page Bottom', href='#page-BOT', style=topNavBarItemStyle):
@@ -352,7 +353,7 @@ class drawHTML:
         with doc.body:
             with div(id='header', align="center", style="background-color:#439775;"):
                 #p('-----------------------------I am a header')
-                self.drawTopNavBar()
+                self.drawTopNavBar(page="ytcdl")
 
             with div(id="mainPageDiv", cls="content", align="center",style="background-color:#48BF84;"):#margin-top: 90px;
                 p(".")
@@ -436,22 +437,21 @@ class drawHTML:
             with form(action=f"{self.homeIpAddress}:5000/{username}/youtube/tables", method="get",
                       name="url_input_form"):
                 p('Select a table to view:')
-                with select(id='fruit-select', name='fruit'):
+                with select(id='table-select-dropdown', name='table_select_input'):
                     # Add option tags
                     option('User Table', value='user_table', selected='selected') # Pre-selected
                     option('Comment Table', value='comment_table')
                     option('Video Table', value='video_table')
                     option('User Table 2', value='userX_table')
                 p('Search for a table:')
-                input_(type='text', name='table name search', cls="text_input_url", value=url_input_value,
-                       required=True)
+                input_(type='text', name='table_search_input', cls="text_input_url", value=url_input_value)  #, required=True
                 p('Number of entries to load:')
                 input_(type='range', name='commentCount_range', min="100", max="5000", value=commentCount_range_value,
                        step="100",
                        oninput="this.form.commentCount_input.value=this.value")
                 input_(type='number', name='commentCount_input', min="100", max="5000", value=commentCount_input_value,
                        oninput="this.form.commentCount_range.value=this.value")
-                input_(type='submit', value="Download", name="url_input_form", title="Click to download comments.")
+                input_(type='submit', value="Download", name="url_input_form", title="Click to download entries.")
                 input_(type='submit', value="Display All",
                        formaction=f"{self.homeIpAddress}:5000/{username}/youtube/tables", method="get",
                        name="display_all_form", title="Click to re-display downloaded comments.",
@@ -472,11 +472,33 @@ class drawHTML:
                 #        name='word_count_input', title="Click to count the occurences of each word, and sort by #.")
         pass
 
-    def drawDynamoTableColumn(self):
+    def drawDynamoTableColumn(self, formDict):
+        print("Start: drawDynamoTableColumn")
+        if formDict is not None:
+            print("drawDynamoTableColumn: pull form values")  # Add user input data to page b4 transmit
+            table_select_input_value = formDict["table_select_input"]
+            table_search_input_value = formDict["table_search_input"]
+            commentCount_range_value = formDict["commentCount_range"]
+            commentCount_input_value = formDict["commentCount_input"]
+            set_displayAll_button_visible = True
+            print(f"drawDynamoTableColumn: url_input_value: {table_select_input_value}")
+            print(f"drawDynamoTableColumn: table_search_input_value: {table_search_input_value}")
+            print(f"drawDynamoTableColumn: commentCount_range_value: {commentCount_range_value}")
+            print(f"drawDynamoTableColumn: commentCount_input_value: {commentCount_input_value}")
+        else:
+            print("drawDynamoTableColumn: print basic form")
+            table_select_input_value = "user_table"
+            table_search_input_value = "user_table"
+            commentCount_range_value = 100
+            commentCount_input_value = 100
+            set_displayAll_button_visible = False
+
+
         myDynamoDB = DynamoDB_interface(table_name="", region_name="us-east-2")
         myDynamoDB#Create tables test
         my_table_name = "video_table"  # Replace with your DynamoDB table name
         my_table_name = "comment_table"  # Replace with your DynamoDB table name
+        my_table_name = table_select_input_value
         my_table_name = "user_table"  # Replace with your DynamoDB table name
         my_region_name = "us-east-2"  # Replace with your DynamoDB table name
         myDynamoDB_interface = DynamoDB_interface(my_table_name, my_region_name)
@@ -489,8 +511,9 @@ class drawHTML:
         dataDisplayCidColumnStyle = f"width:20%;"  # word-wrap: break-all;overflow-x:auto;"
 
         #get_all_table_items test
-        table_items = myDynamoDB_interface.get_all_table_items()
-        print(f"Main: Retrieved {len(table_items)} items from {myDynamoDB_interface.table_name}.")
+        # table_items = myDynamoDB_interface.get_all_table_items()
+        table_items = myDynamoDB_interface.get_x_table_items(commentCount_range_value)
+        print(f"drawDynamoTableColumn: Retrieved {len(table_items)} items from {myDynamoDB_interface.table_name}.")
 
         count = 0
         # for item in table_items:
@@ -513,15 +536,24 @@ class drawHTML:
                         for headerValue in table_items[0].keys():  # add all fields
                             tableHeaderRow.add(td(headerValue))
                     else:
-                        tableHeaderRow.add(td("user_id", style=dataDisplayEntryColumnStyle+break_long_words_style))
-                        tableHeaderRow.add(td("video_id_list", style=break_long_words_style))
-                        tableHeaderRow.add(td("channel", style=break_long_words_style))
+                        if "user_table" in my_table_name:
+                            tableHeaderRow.add(td("Entry #", style=dataDisplayEntryColumnStyle + break_long_words_style))
+                            tableHeaderRow.add(td("user_id", style=dataDisplayEntryColumnStyle+break_long_words_style))
+                            tableHeaderRow.add(td("video_id_list", style=break_long_words_style))
+                            tableHeaderRow.add(td("channel", style=break_long_words_style))
+                        if "comment_table" in my_table_name:
+                            tableHeaderRow.add(td("Entry #", style=dataDisplayEntryColumnStyle + break_long_words_style))
+                            tableHeaderRow.add(td("Authors", style=break_long_words_style))
+                            tableHeaderRow.add(td("Entry Time", style=break_long_words_style))
+                            tableHeaderRow.add(td("Comment", style=dataDisplayCommentColumnStyle))  # dataDisplayCommentColumnStyle
+                            tableHeaderRow.add(td("Comment ID", style=dataDisplayCidColumnStyle + break_long_words_style))  # dataDisplayCidColumnStyle
                     pass
                 with tbody():
+                    entryCount = 1
                     for entry in table_items:
                         tableDataRow = tr()
                         comment = entry #table_items[entry]
-                        print(f"drawDynamoTableColumn: entry: {entry}\n")
+                        #print(f"drawDynamoTableColumn: entry: {entry}\n")
                         if showAllFields:
                             for headerValue in comment.keys():
                                 # table_items[1]
@@ -533,22 +565,25 @@ class drawHTML:
                                     # print(f"drawYoutubeDownloader_CommentData: text surrogate removal, post: {tempData}\n")
                                 tableDataRow.add(td(str(tempData)))
                         else:
-                            tableDataRow.add(td(comment["user_id"]))
-                            tableDataRow.add(td(comment["video_id_list"]))
-                            tableDataRow.add(td(comment["channel"]))
+                            if "comment_table" in my_table_name:
+                                tableDataRow.add(td(entryCount))
+                                tableDataRow.add(td(comment["author"], style=break_long_words_style))
+                                tableDataRow.add(td(comment["time"]))
 
-
-
-                            tableDataRow.add(td(entry))
-                            tableDataRow.add(td(comment["author"], style=break_long_words_style))
-                            tableDataRow.add(td(comment["time"]))
-
-                            tempData = comment["text"]
-                            # print("drawYoutubeDownloader_CommentData: text surrogate removal, pre: ",tempData)
-                            tempData = self.remove_surrogates(tempData)
-                            # print(f"drawYoutubeDownloader_CommentData: text surrogate removal, post: {tempData}\n")
-                            tableDataRow.add(td(tempData, style=dataDisplayCommentColumnStyle))#dataDisplayCommentColumnStyle
-                            tableDataRow.add(td(comment["cid"], style=dataDisplayCidColumnStyle+break_long_words_style))#dataDisplayCidColumnStyle
+                                tempData = comment["text"]
+                                # print("drawYoutubeDownloader_CommentData: text surrogate removal, pre: ",tempData)
+                                tempData = self.remove_surrogates(tempData)
+                                # print(f"drawYoutubeDownloader_CommentData: text surrogate removal, post: {tempData}\n")
+                                tableDataRow.add(
+                                    td(tempData, style=dataDisplayCommentColumnStyle))  # dataDisplayCommentColumnStyle
+                                tableDataRow.add(td(comment["cid"],
+                                                    style=dataDisplayCidColumnStyle + break_long_words_style))  # dataDisplayCidColumnStyle
+                            else: #default to user_table
+                                tableDataRow.add(td(entryCount))
+                                tableDataRow.add(td(comment["user_id"]))
+                                tableDataRow.add(td(comment["video_id_list"]))
+                                tableDataRow.add(td(comment["channel"]))
+                            entryCount += 1
                     pass
                 with tfoot():
                     tableFooterRow = tr()
@@ -556,9 +591,17 @@ class drawHTML:
                         for headerValue in table_items[0]:  # add all fields
                             tableFooterRow.add(td(headerValue))
                     else:
-                        tableFooterRow.add(td("user_id", style=dataDisplayEntryColumnStyle + break_long_words_style))
-                        tableFooterRow.add(td("video_id_list", style=break_long_words_style))
-                        tableFooterRow.add(td("channel", style=break_long_words_style))
+                        if "comment_table" in my_table_name:
+                            tableHeaderRow.add(td("Entry #", style=dataDisplayEntryColumnStyle + break_long_words_style))
+                            tableHeaderRow.add(td("Authors", style=break_long_words_style))
+                            tableHeaderRow.add(td("Entry Time", style=break_long_words_style))
+                            tableHeaderRow.add(td("Comment", style=dataDisplayCommentColumnStyle))  # dataDisplayCommentColumnStyle
+                            tableHeaderRow.add(td("Comment ID", style=dataDisplayCidColumnStyle + break_long_words_style))  # dataDisplayCidColumnStyle
+                        else: #default to user_table
+                            tableFooterRow.add(td("Entry #", style=dataDisplayEntryColumnStyle + break_long_words_style))
+                            tableFooterRow.add(td("user_id", style=dataDisplayEntryColumnStyle + break_long_words_style))
+                            tableFooterRow.add(td("video_id_list", style=break_long_words_style))
+                            tableFooterRow.add(td("channel", style=break_long_words_style))
                     pass
 
             with p(id="page-BOT"):
@@ -566,7 +609,7 @@ class drawHTML:
             with p():
                 a('Goto Page Bottom', href='#page-BOT')
 
-    def drawYoutubeTables(self, name):
+    def drawYoutubeTables(self, name, formDict=None):
         print("Start: drawYoutubeTables")
         doc = document(title='YT Comment DownLoader')
         # false = "False"
@@ -590,7 +633,7 @@ class drawHTML:
                 # data entry Column
                 # dataentryDiv +=
                 self.drawTableSelectColumn(username=name)
-                self.drawDynamoTableColumn()
+                self.drawDynamoTableColumn(formDict)
 
                 # data display Column
                 showAllFields = False

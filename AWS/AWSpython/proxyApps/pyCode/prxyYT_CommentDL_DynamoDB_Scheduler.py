@@ -80,7 +80,7 @@ class DynamoDB_Scheduler:
         print_log(f"updateTables: Start")
         userDict = {}
         dict_ex_entry = {
-                    "authour":
+                    "author":
                         {
                             "channel":"XXXXXXXXXXXXXX",
                             "comment_count":3, 
