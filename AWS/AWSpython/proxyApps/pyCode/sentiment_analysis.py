@@ -1,10 +1,11 @@
 import boto3
 import json
 import youtube_comment_downloader 
-from itertools import islice
-def analyze_overall_sentiment(youtube_url, region="us-east-1"):
-    youtube_url = "https://www.youtube.com/watch?v=c52IzePdOag"
-
+from itertools import islice 
+def analyze_overall_sentiment(youtube_url,loadNumComments, region="us-east-1"):
+    youtube_url = youtube_url.strip()
+    # youtube_url = "https://www.youtube.com/watch?v=c52IzePdOag"
+    print(f"Analyzing sentiment for URL: {youtube_url} with {loadNumComments} comments")
     # Download comments
     downloader = youtube_comment_downloader.YoutubeCommentDownloader()
     SORT_BY_RECENT = 1
@@ -18,7 +19,7 @@ def analyze_overall_sentiment(youtube_url, region="us-east-1"):
 
     # Extract up to 20 comment texts safely
     texts = []
-    for c in islice(comments_iter, 20):
+    for c in islice(comments_iter, loadNumComments):
         t = c.get("text")
         if t:
             texts.append(t.strip())
@@ -74,7 +75,7 @@ def analyze_overall_sentiment(youtube_url, region="us-east-1"):
     # We'll extract the combined text.
     content_blocks = raw.get("content", [])
     model_text = "".join(block.get("text", "") for block in content_blocks)
-
+    print("RAW MODEL TEXT >>>", repr(model_text), "<<<")
     print(model_text)
     return json.loads(model_text)
 

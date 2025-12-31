@@ -165,7 +165,7 @@ class drawHTML:
             pass
         return FooterBarDiv
 
-    def drawDataEntryColumn(self, username, formDict=None,isSemantic=False, homeIpAddress="http://13.58.4.21"):
+    def drawDataEntryColumn(self, username, formDict=None, homeIpAddress="http://13.58.4.21"):
         url_input_value = ""
         # homeIpAddress = "http://13.58.4.21"
         if formDict is not None:
@@ -239,18 +239,8 @@ class drawHTML:
                 input_(type="submit", value='Count # of word occurrences',
                        formaction=f"{homeIpAddress}:5000/{username}/youtube/sort_most_common_words", method="get",
                        name='word_count_input', title="Click to count the occurences of each word, and sort by #.")
-                if (isSemantic):
-                    overall_sentiment = self.sentiment_result["overall_sentiment"]
-                    summary = self.sentiment_result["summary"]
-                    with table(style="width: 80%; table-layout: fixed;"):  # style="width: 50%;"
-                        with thead():
-                            tableHeaderRow = tr()
-                            tableHeaderRow.add(td("Overall Sentiment", style=dataDisplayEntryColumnStyle+break_long_words_style))
-                            tableHeaderRow.add(td("Summary", style=break_long_words_style))
-                        with tbody():
-                            tableDataRow = tr()
-                            tableDataRow.add(td(overall_sentiment))
-                            tableDataRow.add(td(summary))
+                hr()
+
                 # Data Analysis buttons V2: queue implementation
                 # with form(action=f"{homeIpAddress}:5000/{username}/youtube/sort_comments", method="get", name="count_analysis_form"):
                 # p('Data Analysis buttons(SQS):', title="This set of buttons utilizes the AWS SQS.")
@@ -274,7 +264,25 @@ class drawHTML:
                     a('Goto Page Bottom', href='#page-BOT')
         return dataEntryDiv
 
-
+    def drawDataSentimentColumn(self, isSemantic=False):
+        break_long_words_style_ana = f"overflow-wrap: break-word;  word-wrap: break-word;  word-break: break-all;  word-break: break-word;  hyphens: auto;"
+        dataDisplayEntryColumnStyle_ana = f"width:8%;"  # overflow-x:auto;"
+        print(f"drawDataSentimentColumn: isSemantic: {isSemantic}")
+        if (isSemantic):
+            with div(id="SentimentAnalysisColumn", style="background-color:#C0D6DF;") as SentimentAnalysisDiv:  # cls="column",
+                p('Sentiment Analysis Result:')               
+                overall_sentiment = self.sentiment_result["overall_sentiment"]
+                summary = self.sentiment_result["summary"]
+                with table(style="width: 80%; table-layout: fixed;"):  # style="width: 50%;"
+                    with thead():
+                        tableHeaderRow = tr()
+                        tableHeaderRow.add(td("Overall Sentiment", style=dataDisplayEntryColumnStyle_ana+break_long_words_style_ana))
+                        tableHeaderRow.add(td("Summary", style=break_long_words_style_ana))
+                    with tbody():
+                        tableDataRow = tr()
+                        tableDataRow.add(td(overall_sentiment, style=dataDisplayEntryColumnStyle_ana+break_long_words_style_ana))
+                        tableDataRow.add(td(summary,style=dataDisplayEntryColumnStyle_ana+break_long_words_style_ana))
+            return SentimentAnalysisDiv
     def drawDataDisplayColumn(self, showAllFields = False):
         # showAllFields = False
         setDivWidth = "width: 100%;"
@@ -294,6 +302,7 @@ class drawHTML:
             with table(style="width: 80%; table-layout: fixed;"):  # style="width: 50%;"
                 with thead():
                     tableHeaderRow = tr()
+                    print(f"drawDataDisplayColumn: showAllFields: {showAllFields}")
                     if showAllFields:
                         # print(f"-----drawDataDisplayColumn: self.videoData {self.videoData}.")
                         # print(f"-----drawDataDisplayColumn: self.videoData[\"1\"] {self.videoData['1']}.")
@@ -418,9 +427,11 @@ class drawHTML:
 
                 with div(cls="row", style="background-color:#61D095;"):
                     #data entry Column
-                    self.drawDataEntryColumn(username, formDict,isSemantic)
-
+                    self.drawDataEntryColumn(username, formDict)
+                    print(f"drawYoutubeDownloader_CommentData: isSemantic: {isSemantic}")
+                    self.drawDataSentimentColumn(isSemantic)
                     #data display Column
+                    print(f"drawYoutubeDownloader_CommentData: showAllFields: {showAllFields}")
                     self.drawDataDisplayColumn(showAllFields)
 
             with div(id='footer', style="background-color:#E0BAD7;"):
@@ -718,7 +729,7 @@ class drawHTML:
     def draw_sentament_analysis_data(self, name, formDict):
         print("Start: sentiment_analysis_input")
         print(f"selectPainting: form: {formDict}")
-        return self.drawYoutubeDownloader_CommentData(name, formDict, showAllFields = True,isSemantic=True)
+        return self.drawYoutubeDownloader_CommentData(name, formDict, showAllFields = False,isSemantic=True)
        
     def draw_count_analysis_form(self, name, formDict):
         print("Start: draw_count_analysis_form")

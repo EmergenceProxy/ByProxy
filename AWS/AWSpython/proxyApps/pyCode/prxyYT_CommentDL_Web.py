@@ -346,8 +346,8 @@ class DownloadSession:
         return returnDict
         pass
     # wrapper for sentiment analysis logic
-    def getSentiment(name):
-        return analyze_overall_sentiment(name)
+    def getSentiment(self,name):
+        return analyze_overall_sentiment(self.entry_for_link,self.loadNumComments)
     def countWords(self, option="alpha"):
         print_log("Start coundWords")
 
